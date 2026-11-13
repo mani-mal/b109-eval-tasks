@@ -63,6 +63,23 @@ class TokenBucket:
         self._last = now
         return True
 
+    def acquire(self, n: float = 1, *, sleep: Callable[[float], object] = time.sleep,
+                timeout: float | None = None) -> bool:
+        """Wait until ``n`` tokens can be taken, then take them.
+
+        Returns False, taking nothing, if the total wait would exceed
+        ``timeout`` seconds.
+        """
+        self._check_request(n)
+        waited = 0.0
+        while not self.try_acquire(n):
+            wait = self.time_until(n)
+            if timeout is not None and waited + wait >= timeout:
+                return False
+            sleep(wait)
+            waited += wait
+        return True
+
     def time_until(self, n: float = 1) -> float:
         """Seconds until ``n`` tokens will be available (0.0 if they already are)."""
         self._check_request(n)

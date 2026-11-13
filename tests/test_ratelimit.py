@@ -62,5 +62,14 @@ class TokenBucketTest(unittest.TestCase):
         self.assertEqual(bucket.available(), 2.0)
 
 
+class AcquireTest(unittest.TestCase):
+    def test_waits_for_token(self):
+        clock = FakeClock()
+        bucket = TokenBucket(1, 1, clock=clock)
+        self.assertTrue(bucket.acquire())
+        self.assertTrue(bucket.acquire(sleep=clock.advance, timeout=1.0))
+        self.assertEqual(clock.now, 101.0)
+
+
 if __name__ == "__main__":
     unittest.main()
