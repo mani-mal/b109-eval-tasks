@@ -28,6 +28,11 @@ class CurrencyMismatch(ValueError):
     pass
 
 
+def _places(currency: str) -> int:
+    """Decimal places for ``currency``; codes missing from MINOR_UNITS use 2."""
+    return MINOR_UNITS.get(currency) or 2
+
+
 def _exponent(currency: str) -> Decimal:
     return Decimal(1).scaleb(-MINOR_UNITS[currency])
 
@@ -106,7 +111,7 @@ class Money:
 
     def to_plain(self) -> str:
         """The amount alone, e.g. ``1234.50``."""
-        return f"{self.amount:.{MINOR_UNITS[self.currency]}f}"
+        return f"{self.amount:.{_places(self.currency)}f}"
 
     def format(self) -> str:
         """Human-readable form with thousands separators, e.g. ``USD 1,234.50``."""

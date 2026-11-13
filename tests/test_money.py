@@ -67,5 +67,10 @@ class MoneyTest(unittest.TestCase):
             sum_money([])
 
 
+class UnlistedCurrencyTest(unittest.TestCase):
+    def test_to_plain(self):
+        self.assertEqual(Money(Decimal("1.5"), "XYZ").to_plain(), "1.50")
+
+
 if __name__ == "__main__":
     unittest.main()
