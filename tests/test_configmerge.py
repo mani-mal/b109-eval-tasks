@@ -3,7 +3,8 @@ import unittest
 from pathlib import Path
 
 from b109tasks.configmerge import (
-    ConfigError, dumps, get, get_bool, get_int, interpolate, load_files, merge, parse,
+    ConfigError, dumps, get, get_bool, get_float, get_int, interpolate, load_files, merge,
+    parse,
 )
 
 SAMPLE = """
@@ -73,6 +74,13 @@ class AccessorTest(unittest.TestCase):
         self.assertEqual(get_int(self.cfg, "s", "missing", 7), 7)
         with self.assertRaises(ConfigError):
             get_int(self.cfg, "s", "word")
+
+    def test_get_float(self):
+        cfg = parse("[s]\nratio = 0.25\n")
+        self.assertEqual(get_float(cfg, "s", "ratio"), 0.25)
+        self.assertEqual(get_float(cfg, "s", "missing", 1.5), 1.5)
+        with self.assertRaises(KeyError):
+            get_float(cfg, "s", "missing")
 
     def test_get_bool(self):
         self.assertTrue(get_bool(self.cfg, "s", "flag"))

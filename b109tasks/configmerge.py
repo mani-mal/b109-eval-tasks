@@ -17,6 +17,7 @@ from __future__ import annotations
 import re
 from collections.abc import Iterable, Mapping
 from pathlib import Path
+from typing import Any
 
 __all__ = [
     "Config",
@@ -24,6 +25,7 @@ __all__ = [
     "dumps",
     "get",
     "get_bool",
+    "get_float",
     "get_int",
     "interpolate",
     "load_files",
@@ -97,28 +99,39 @@ def get(config: Mapping[str, Mapping[str, str]], section: str, key: str,
         return default  # type: ignore[return-value]
 
 
-def get_int(config: Mapping[str, Mapping[str, str]], section: str, key: str,
-            default: object = _MISSING) -> int:
-    value = get(config, section, key, default)
-    if value is default and default is not _MISSING:
-        return value  # type: ignore[return-value]
-    try:
-        return int(value)
-    except ValueError:
-        raise ConfigError(f"{section}.{key} is not an integer: {value!r}") from None
-
-
-def get_bool(config: Mapping[str, Mapping[str, str]], section: str, key: str,
-             default: object = _MISSING) -> bool:
-    value = get(config, section, key, default)
-    if value is default and default is not _MISSING:
-        return value  # type: ignore[return-value]
-    lowered = value.lower()
+def _to_bool(raw: str) -> bool:
+    lowered = raw.lower()
     if lowered in _TRUE:
         return True
     if lowered in _FALSE:
         return False
-    raise ConfigError(f"{section}.{key} is not a boolean: {value!r}")
+    raise ValueError(raw)
+
+
+def _typed(config: Mapping[str, Mapping[str, str]], section: str, key: str,
+           default: object, convert: Any, kind: str) -> Any:
+    raw = get(config, section, key, None)
+    if raw is None and default is not _MISSING:
+        return default
+    try:
+        return convert(raw)
+    except ValueError:
+        raise ConfigError(f"{section}.{key} is not {kind}: {raw!r}") from None
+
+
+def get_int(config: Mapping[str, Mapping[str, str]], section: str, key: str,
+            default: object = _MISSING) -> int:
+    return _typed(config, section, key, default, int, "an integer")
+
+
+def get_float(config: Mapping[str, Mapping[str, str]], section: str, key: str,
+              default: object = _MISSING) -> float:
+    return _typed(config, section, key, default, float, "a number")
+
+
+def get_bool(config: Mapping[str, Mapping[str, str]], section: str, key: str,
+             default: object = _MISSING) -> bool:
+    return _typed(config, section, key, default, _to_bool, "a boolean")
 
 
 _REF = re.compile(r"\$\{([^.{}]+)\.([^{}]+)\}")
