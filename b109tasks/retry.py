@@ -58,6 +58,7 @@ def retry(
     retry_on: tuple[type[BaseException], ...] = (Exception,),
     sleep: Callable[[float], Any] = time.sleep,
     on_retry: Callable[[int, BaseException, float], Any] | None = None,
+    jitter: Callable[[float], float] | None = None,
     max_elapsed: float | None = None,
     clock: Callable[[], float] = time.monotonic,
     limiter: Limiter | None = None,
@@ -89,6 +90,8 @@ def retry(
             if attempt == attempts:
                 raise RetryError(attempts, exc) from exc
             delay = delays[attempt - 1]
+            if jitter is not None:
+                delay = max(0.0, jitter(delay)
             if max_elapsed is not None and elapsed + delay > max_elapsed:
                 raise RetryError(attempt, exc) from exc
             if on_retry is not None:

@@ -102,5 +102,12 @@ class LimiterTest(unittest.TestCase):
         self.assertEqual(bucket.available(), 0)
 
 
+class JitterTest(unittest.TestCase):
+    def test_jitter_applied(self):
+        slept = []
+        retry(Flaky(2), attempts=3, base_delay=1, sleep=slept.append, jitter=lambda d: d / 2)
+        self.assertEqual(slept, [0.5, 1.0])
+
+
 if __name__ == "__main__":
     unittest.main()
