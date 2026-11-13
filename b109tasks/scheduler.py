@@ -77,7 +77,7 @@ class Scheduler:
         self,
         *,
         sleep: Callable[[float], Any] = time.sleep,
-        clock: Callable[[], float] = time.monotonic,
+        clock: Callable[[], float] | None = None,
         base_delay: float = 0.5,
     ) -> None:
         self._deps: dict[str, list[str]] = {}
@@ -190,11 +190,15 @@ class Scheduler:
         """
         if budget is not None and budget <= 0:
             raise ValueError("budget must be positive")
+        if budget is not None and self._clock is None:
+            raise ValueError("a budget needs a clock")
         order = self.order()
-        started = self._clock()
+        started = self._clock() if self._clock is not None else 0.0
 
         def left() -> float | None:
-            return None if budget is None else budget - (self._clock() - started)
+            if budget is None or self._clock is None:
+                return None
+            return budget - (self._clock() - started)
 
         if not keep_going:
             results: dict[str, Any] = {}

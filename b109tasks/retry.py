@@ -59,7 +59,7 @@ def retry(
     sleep: Callable[[float], Any] = time.sleep,
     on_retry: Callable[[int, BaseException, float], Any] | None = None,
     max_elapsed: float | None = None,
-    clock: Callable[[], float] = time.monotonic,
+    clock: Callable[[], float] | None = time.monotonic,
     limiter: Limiter | None = None,
 ) -> T:
     """Call ``fn`` until it succeeds or ``attempts`` calls have failed.
@@ -73,10 +73,13 @@ def retry(
     from just before the first call. Before sleeping, retry() gives up (raising
     RetryError without sleeping) if the time used so far plus the next delay
     would exceed the budget; ending exactly on the budget is allowed.
+    ``clock`` may be None when there is no budget.
 
     With a ``limiter``, every call (retries included) first takes one token,
     sleeping for ``limiter.time_until()`` whenever none is available.
     """
+    if max_elapsed is not None and clock is None:
+        raise ValueError("max_elapsed needs a clock")
     delays = backoff_delays(attempts, base_delay, factor, max_delay)
     started = clock()
     for attempt in range(1, attempts + 1):
