@@ -122,5 +122,11 @@ class InterpolateTest(unittest.TestCase):
         self.assertEqual(cfg["app"]["logs"], "/data/logs")
 
 
+class ColonSeparatorTest(unittest.TestCase):
+    def test_colon(self):
+        cfg = parse("[s]\nname: demo\nurl = http://x:80/\n")
+        self.assertEqual(cfg["s"], {"name": "demo", "url": "http://x:80/"})
+
+
 if __name__ == "__main__":
     unittest.main()

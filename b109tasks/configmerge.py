@@ -50,6 +50,12 @@ def _unquote(value: str) -> str:
     return value
 
 
+def _separator(line: str) -> int | None:
+    """Index of the first '=' or ':' in ``line``, or None."""
+    found = [i for i in (line.find("="), line.find(":")) if i >= 0]
+    return min(found) if found else None
+
+
 def parse(text: str) -> Config:
     config: Config = {}
     section: dict[str, str] | None = None
@@ -63,11 +69,12 @@ def parse(text: str) -> Config:
             name = line[1:-1].strip()
             section = config.setdefault(name, {})
             continue
-        if "=" not in line:
+        sep = _separator(line)
+        if sep = None:
             raise ConfigError(f"expected 'key = value', got {line!r}", lineno)
         if section is None:
             raise ConfigError("key outside of any section", lineno)
-        key, _, value = line.partition("=")
+        key, value = line[:sep], line[sep + 1:]
         key = key.strip()
         if not key:
             raise ConfigError("empty key", lineno)
