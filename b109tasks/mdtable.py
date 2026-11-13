@@ -6,6 +6,7 @@ escaped as ``\\|`` and newlines become spaces, so every row stays on one line.
 
 from __future__ import annotations
 
+import re
 from collections.abc import Sequence
 from typing import Any
 
@@ -21,8 +22,11 @@ def _cell(value: Any) -> str:
     return str(value).replace("\r\n", " ").replace("\n", " ")
 
 
+_MARKUP = re.compile(r"([\\`*_\[\]()-])")
+
+
 def _escape(text: str) -> str:
-    return text.replace("|", "\\|")
+    return _MARKUP.sub(r"\\\1", text).replace("|", "\\|")
 
 
 def _pad(text: str, width: int, align: str) -> str:

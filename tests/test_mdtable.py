@@ -41,5 +41,12 @@ class FormatTableTest(unittest.TestCase):
             format_table(["a"], [], align=["left", "left"])
 
 
+class MarkupEscapeTest(unittest.TestCase):
+    def test_emphasis_escaped(self):
+        out = format_table(["name"], [["*draft*"], ["snake_case"]])
+        self.assertIn("\\*draft\\*", out)
+        self.assertIn("snake\\_case", out)
+
+
 if __name__ == "__main__":
     unittest.main()
