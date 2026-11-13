@@ -69,9 +69,22 @@ class DateRangeTest(unittest.TestCase):
         parts = split_by_month(parse_range("2024-01-20..2024-03-03"))
         self.assertEqual([str(p) for p in parts], [
             "2024-01-20..2024-01-31",
-            "2024-02-01..2024-02-29",
+            "2024-02",
             "2024-03-01..2024-03-03",
         ])
+
+
+class CompactStrTest(unittest.TestCase):
+    def test_single_day(self):
+        self.assertEqual(str(parse_range("2024-03-05")), "2024-03-05")
+
+    def test_whole_month(self):
+        self.assertEqual(str(parse_range("2024-03")), "2024-03")
+        self.assertEqual(str(parse_range("2023-02-01..2023-02-28")), "2023-02")
+
+    def test_partial_month(self):
+        self.assertEqual(str(parse_range("2024-02-01..2024-02-28")), "2024-02-01..2024-02-28")
+        self.assertEqual(str(parse_range("2024-03-02..2024-03-31")), "2024-03-02..2024-03-31")
 
 
 if __name__ == "__main__":

@@ -60,6 +60,11 @@ class DateRange:
             day += one
 
     def __str__(self) -> str:
+        if self.start == self.end:
+            return self.start.isoformat()
+        same_month = (self.start.year, self.start.month) == (self.end.year, self.end.month)
+        if same_month and self.start.day == 1 and self.end.day >= 28:
+            return f"{self.start.year:04d}-{self.start.month:02d}"
         return f"{self.start.isoformat()}..{self.end.isoformat()}"
 
 
