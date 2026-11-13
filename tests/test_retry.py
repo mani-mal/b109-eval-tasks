@@ -102,5 +102,10 @@ class LimiterTest(unittest.TestCase):
         self.assertEqual(bucket.available(), 0)
 
 
+class SingleAttemptTest(unittest.TestCase):
+    def test_delay_settings_ignored(self):
+        self.assertEqual(retry(Flaky(0), attempts=1, factor=0.5, base_delay=-1), "ok")
+
+
 if __name__ == "__main__":
     unittest.main()

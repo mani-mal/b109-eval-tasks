@@ -77,6 +77,9 @@ def retry(
     With a ``limiter``, every call (retries included) first takes one token,
     sleeping for ``limiter.time_until()`` whenever none is available.
     """
+    if attempts == 1 and max_elapsed is None and limiter is None:
+        # A single attempt never sleeps, so skip the backoff bookkeeping.
+        return fn()
     delays = backoff_delays(attempts, base_delay, factor, max_delay)
     started = clock()
     for attempt in range(1, attempts + 1):
