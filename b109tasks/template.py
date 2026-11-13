@@ -29,7 +29,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass, field
 from typing import Any
 
-__all__ = ["Template", "TemplateSyntaxError", "UndefinedError", "render"]
+__all__ = ["Template", "TemplateSyntaxError", "UndefinedError", "render", "resolve_path"]
 
 _TOKEN = re.compile(r"({{.*?}}|{%.*?%})", re.DOTALL)
 _FILTER = re.compile(r'^(\w+)(?::"(.*)")?$', re.DOTALL)
@@ -67,7 +67,8 @@ class _For:
     body: list[Any] = field(default_factory=list)
 
 
-def _resolve(context: Mapping[str, Any], path: str) -> Any:
+def resolve_path(context: Mapping[str, Any], path: str) -> Any:
+    """Look up a dotted ``path``: dict keys first, then attributes."""
     head, *rest = path.split(".")
     if head not in context:
         raise UndefinedError(path)
@@ -202,7 +203,7 @@ class Template:
     @staticmethod
     def _render_var(node: _Var, ctx: Mapping[str, Any], esc: bool) -> str:
         try:
-            value = _resolve(ctx, node.path)
+            value = resolve_path(ctx, node.path)
         except UndefinedError:
             if not any(name == "default" for name, _ in node.filters):
                 raise

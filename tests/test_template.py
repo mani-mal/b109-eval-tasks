@@ -1,7 +1,7 @@
 import unittest
 from types import SimpleNamespace
 
-from b109tasks.template import Template, TemplateSyntaxError, UndefinedError, render
+from b109tasks.template import Template, TemplateSyntaxError, UndefinedError, render, resolve_path
 
 
 class TemplateTest(unittest.TestCase):
@@ -76,6 +76,14 @@ class ForLoopTest(unittest.TestCase):
                     "{% if a %}{% endfor %}", "{% for x in xs %}{% else %}{% endfor %}"]:
             with self.subTest(src=src), self.assertRaises(TemplateSyntaxError):
                 Template(src)
+
+
+class ResolvePathTest(unittest.TestCase):
+    def test_lookup(self):
+        ctx = {"a": {"b": SimpleNamespace(c=3)}}
+        self.assertEqual(resolve_path(ctx, "a.b.c"), 3)
+        with self.assertRaises(UndefinedError):
+            resolve_path(ctx, "zz")
 
 
 if __name__ == "__main__":
