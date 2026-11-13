@@ -67,5 +67,12 @@ class MoneyTest(unittest.TestCase):
             sum_money([])
 
 
+class GroupingTest(unittest.TestCase):
+    def test_grouping(self):
+        self.assertEqual(Money.of("1234567.5", "USD").to_plain(grouping=True), "1,234,567.50")
+        self.assertEqual(Money.of("1234", "JPY").to_plain(grouping=True), "1,234")
+        self.assertEqual(Money.of("1234.5", "USD").to_plain(), "1234.50")
+
+
 if __name__ == "__main__":
     unittest.main()

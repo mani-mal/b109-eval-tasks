@@ -104,9 +104,18 @@ class Money:
             shares[i] += 1
         return [Money(Decimal(s) * unit, self.currency) for s in shares]
 
-    def to_plain(self) -> str:
-        """The amount alone, e.g. ``1234.50``."""
-        return f"{self.amount:.{MINOR_UNITS[self.currency]}f}"
+    def to_plain(self, grouping: bool = False) -> str:
+        """The amount alone, e.g. ``1234.50`` (``1,234.50`` with ``grouping``)."""
+        places = MINOR_UNITS[self.currency]
+        sign, digits, _ = self.amount.quantize(_exponent(self.currency)).as_tuple()
+        text = "".join(map(str, digits)).rjust(places + 1, "0")
+        whole, frac = (text[:-places], text[-places:]) if places else (text, "")
+        if grouping:
+            groups = []
+            while len(whole) > 3:
+                whole, groups = whole[:-3], [whole[-3:]] + groups
+            whole = ",".join([whole] + groups)
+        return whole + ("." + frac if frac else "")
 
     def format(self) -> str:
         """Human-readable form with thousands separators, e.g. ``USD 1,234.50``."""
