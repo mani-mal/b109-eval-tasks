@@ -7,12 +7,16 @@ succeeds only if ``n`` are available.
 
 from __future__ import annotations
 
+import re
 import time
 from collections.abc import Callable
 
 __all__ = ["TokenBucket"]
 
 Clock = Callable[[], float]
+
+_UNIT_SECONDS = {"s": 1.0, "m": 60.0, "h": 3600.0}
+_SPEC = re.compile(r"^\s*(\d+)\s*/\s*([smh])\s*$")
 
 
 class TokenBucket:
@@ -33,9 +37,19 @@ class TokenBucket:
             raise ValueError("initial must be between 0 and capacity")
         self.capacity = float(capacity)
         self.refill_rate = float(refill_rate)
+        self._interval = 1.0 / self.refill_rate
         self._clock = clock
         self._tokens = float(start)
         self._last = clock()
+
+    @classmethod
+    def from_string(cls, spec: str, *, clock: Clock = time.monotonic) -> TokenBucket:
+        """Build a bucket from ``"10/s"``, ``"100/m"`` or ``"5/h"``."""
+        m = _SPEC.match(spec)
+        if not m or int(m[1]) == 0:
+            raise ValueError(f"bad rate spec {spec!r}")
+        count = int(m[1])
+        return cls(count, count / _UNIT_SECONDS[m[2]], clock=clock)
 
     def _elapsed(self, now: float) -> float:
         # A clock that steps backwards must not drain the bucket.
@@ -67,7 +81,7 @@ class TokenBucket:
         """Seconds until ``n`` tokens will be available (0.0 if they already are)."""
         self._check_request(n)
         deficit = n - self.available()
-        return max(0.0, deficit / self.refill_rate)
+        return max(0.0, deficit / self._interval)
 
     def reset(self) -> None:
         """Refill the bucket completely."""

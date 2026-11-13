@@ -62,5 +62,13 @@ class TokenBucketTest(unittest.TestCase):
         self.assertEqual(bucket.available(), 2.0)
 
 
+class FromStringTest(unittest.TestCase):
+    def test_units(self):
+        self.assertEqual(TokenBucket.from_string("10/s").refill_rate, 10.0)
+        self.assertEqual(TokenBucket.from_string("120/m").refill_rate, 2.0)
+        with self.assertRaises(ValueError):
+            TokenBucket.from_string("ten per second")
+
+
 if __name__ == "__main__":
     unittest.main()
