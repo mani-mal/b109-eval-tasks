@@ -53,7 +53,8 @@ class MoneyTest(unittest.TestCase):
         self.assertEqual(Money.of("1234.5", "USD").format(), "USD 1,234.50")
         self.assertEqual(Money.of("-5", "USD").format(), "USD -5.00")
         self.assertEqual(str(Money.of("1234567", "JPY")), "JPY 1,234,567")
-        self.assertEqual(Money.of("1234.5", "USD").to_plain(), "1234.50")
+        self.assertEqual(Money.of("1234.5", "USD").amount_str(), "1234.50")
+        self.assertEqual(Money.of("1234.5", "USD").amount_str(thousands=True), "1,234.50")
 
     def test_compare(self):
         self.assertLess(Money.of("1", "USD"), Money.of("2", "USD"))
