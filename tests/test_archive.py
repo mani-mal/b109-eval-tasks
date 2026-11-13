@@ -27,6 +27,10 @@ class SafetyTest(unittest.TestCase):
 
 
 class ListArchiveTest(unittest.TestCase):
+    def test_directories_first(self):
+        z = make_zip([("z/", b""), ("a.txt", b""), ("m/", b""), ("m/f.txt", b"")])
+        self.assertEqual([e.name for e in list_archive(z)], ["m/", "z/", "a.txt", "m/f.txt"])
+
     def test_lists_sorted(self):
         z = make_zip([("b.txt", b"hello"), ("a/", b""), ("a/c.txt", b"x" * 10)])
         entries = list_archive(z)

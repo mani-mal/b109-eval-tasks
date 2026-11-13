@@ -46,7 +46,7 @@ def is_safe_member(name: str) -> bool:
 
 
 def list_archive(source: str | Path | BinaryIO, *, max_entries: int = 10_000) -> list[Entry]:
-    """Return the archive's entries sorted by name.
+    """Return the archive's entries: directories first, then files, each by name.
 
     Raises :class:`UnsafeArchiveError` if any member is unsafe and
     ``ValueError`` if there are more than ``max_entries`` members.
@@ -67,7 +67,7 @@ def list_archive(source: str | Path | BinaryIO, *, max_entries: int = 10_000) ->
                     is_dir=info.is_dir(),
                 )
             )
-    return sorted(entries, key=lambda e: e.name)
+    return sorted(entries, key=lambda e: (e.is_dir, e.name))
 
 
 def total_size(entries: list[Entry]) -> int:
