@@ -51,10 +51,15 @@ class Version:
     def core(self) -> tuple[int, int, int]:
         return (self.major, self.minor, self.patch)
 
+    @property
+    def release(self) -> Version:
+        """The same version without prerelease or build metadata."""
+        return Version(self.major, self.minor, self.patch)
+
     def __str__(self) -> str:
-        text = f"{self.major}.{self.minor}.{self.patch}"
+        text = ".".join(str(n) for n in self.core)
         if self.prerelease:
-            text += "-" + ".".join(self.prerelease)
+            text += "-" + "-".join(self.prerelease)
         return text
 
     def __eq__(self, other: object) -> bool:

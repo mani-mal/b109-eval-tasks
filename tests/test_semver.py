@@ -60,5 +60,10 @@ class SatisfiesTest(unittest.TestCase):
         self.assertIsNone(max_satisfying(versions, ">3.0.0"))
 
 
+class ReleaseTest(unittest.TestCase):
+    def test_release(self):
+        self.assertEqual(Version.parse("2.0.0-beta+exp").release, Version.parse("2.0.0"))
+
+
 if __name__ == "__main__":
     unittest.main()
