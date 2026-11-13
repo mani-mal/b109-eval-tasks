@@ -36,7 +36,7 @@ class RetryTest(unittest.TestCase):
         fn = Flaky(2)
         self.assertEqual(retry(fn, attempts=3, base_delay=1, sleep=slept.append), "ok")
         self.assertEqual(fn.calls, 3)
-        self.assertEqual(slept, [1, 2])
+        self.assertEqual(slept, [1, 3])
 
     def test_gives_up(self):
         fn = Flaky(5)

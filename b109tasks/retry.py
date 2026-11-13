@@ -53,7 +53,7 @@ def retry(
     *,
     attempts: int = 3,
     base_delay: float = 0.1,
-    factor: float = 2.0,
+    factor: float = 3.0,
     max_delay: float = 30.0,
     retry_on: tuple[type[BaseException], ...] = (Exception,),
     sleep: Callable[[float], Any] = time.sleep,
