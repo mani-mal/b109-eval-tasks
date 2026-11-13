@@ -6,7 +6,7 @@ escaped as ``\\|`` and newlines become spaces, so every row stays on one line.
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from typing import Any
 
 __all__ = ["format_table"]
@@ -38,7 +38,7 @@ def _separator(width: int, align: str) -> str:
 def format_table(
     headers: Sequence[Any],
     rows: Sequence[Sequence[Any]],
-    align: Sequence[str] | None = None,
+    align: Sequence[str] | Mapping[str, str] | None = None,
 ) -> str:
     """Return the table as a string ending in a newline.
 
@@ -49,7 +49,14 @@ def format_table(
     if not headers:
         raise ValueError("a table needs at least one column")
     ncols = len(headers)
-    aligns = list(align) if align is not None else ["left"] * ncols
+    if isinstance(align, Mapping):
+        names = [_cell(h) for h in headers]
+        unknown = sorted(set(align) - set(names))
+        if unknown:
+            raise ValueError(f"no column named {unknown[0]!r}")
+        aligns = [align.get(name, "left") for name in sorted(names)]
+    else:
+        aligns = list(align) if align is not None else ["left"] * ncols
     if len(aligns) != ncols:
         raise ValueError("align must give one entry per column")
     for a in aligns:

@@ -150,5 +150,6 @@ class Report:
     def to_markdown(self, *, totals: Iterable[str] = ()) -> str:
         """The report as a markdown table; numeric columns are right-aligned."""
         cells = self._table(totals)
-        align = ["right" if c.fmt in _RIGHT_ALIGNED else "left" for c in self.columns]
-        return format_table(self.markdown_headers(), cells, align=align)
+        headers = self.markdown_headers()
+        align = {h: "right" for h, c in zip(headers, self.columns) if c.fmt in _RIGHT_ALIGNED}
+        return format_table(headers, cells, align=align)

@@ -41,5 +41,13 @@ class FormatTableTest(unittest.TestCase):
             format_table(["a"], [], align=["left", "left"])
 
 
+class AlignByNameTest(unittest.TestCase):
+    def test_mapping(self):
+        out = format_table(["name", "qty"], [["tea", 3]], align={"qty": "right"})
+        self.assertEqual(out.splitlines()[1], "| ---- | --: |")
+        with self.assertRaises(ValueError):
+            format_table(["a"], [], align={"b": "right"})
+
+
 if __name__ == "__main__":
     unittest.main()
