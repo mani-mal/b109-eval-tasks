@@ -41,5 +41,11 @@ class FormatTableTest(unittest.TestCase):
             format_table(["a"], [], align=["left", "left"])
 
 
+class MaxWidthTest(unittest.TestCase):
+    def test_truncates_long_cells(self):
+        out = format_table(["word"], [["hello"], ["hello world"]], max_width=5)
+        self.assertEqual(out, "| word  |\n| ----- |\n| hello |\n| hell\u2026 |\n")
+
+
 if __name__ == "__main__":
     unittest.main()
