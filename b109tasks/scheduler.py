@@ -103,7 +103,7 @@ class Scheduler:
     def __len__(self) -> int:
         return len(self._deps)
 
-    def order(self) -> list[str]:
+    def topological_order(self) -> list[str]:
         """All jobs in run order. Raises CycleError or UnknownJobError."""
         for name, deps in self._deps.items():
             for dep in deps:

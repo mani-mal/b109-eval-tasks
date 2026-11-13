@@ -11,20 +11,20 @@ class OrderTest(unittest.TestCase):
         s.add("deploy", ["build", "test"])
         s.add("test", ["build"])
         s.add("build")
-        self.assertEqual(s.order(), ["build", "test", "deploy"])
+        self.assertEqual(s.topological_order(), ["build", "test", "deploy"])
 
     def test_ties_keep_insertion_order(self):
         s = Scheduler()
         for name in ["lint", "fmt", "build"]:
             s.add(name)
         s.add("package", ["build", "lint"])
-        self.assertEqual(s.order(), ["lint", "fmt", "build", "package"])
+        self.assertEqual(s.topological_order(), ["lint", "fmt", "build", "package"])
 
     def test_unknown_dependency(self):
         s = Scheduler()
         s.add("a", ["ghost"])
         with self.assertRaises(UnknownJobError):
-            s.order()
+            s.topological_order()
 
     def test_duplicate_job(self):
         s = Scheduler()
@@ -37,7 +37,7 @@ class OrderTest(unittest.TestCase):
         s.add("a", ["b"])
         s.add("b", ["a"])
         with self.assertRaises(CycleError) as ctx:
-            s.order()
+            s.topological_order()
         self.assertEqual(ctx.exception.cycle, ["a", "b", "a"])
         self.assertIn("a -> b -> a", str(ctx.exception))
 
@@ -45,7 +45,7 @@ class OrderTest(unittest.TestCase):
         s = Scheduler()
         s.add("a", ["a"])
         with self.assertRaises(CycleError) as ctx:
-            s.order()
+            s.topological_order()
         self.assertEqual(ctx.exception.cycle, ["a", "a"])
 
     def test_dependents_of(self):
