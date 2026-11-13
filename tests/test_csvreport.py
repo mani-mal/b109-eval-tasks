@@ -1,7 +1,7 @@
 import unittest
 from decimal import Decimal
 
-from b109tasks.csvreport import Column, Report, format_value
+from b109tasks.csvreport import Column, Report, format_value, register_format
 from b109tasks.money import CurrencyMismatch, Money
 
 
@@ -105,6 +105,18 @@ class TotalsTest(unittest.TestCase):
         report.add_rows([{"k": 1, "m": Money.of("1", "USD")}, {"k": 2, "m": Money.of("1", "EUR")}])
         with self.assertRaises(CurrencyMismatch):
             report.to_markdown()
+
+
+class RegisterFormatTest(unittest.TestCase):
+    def test_custom_format(self):
+        register_format("yesno", lambda v: "yes" if v else "no")
+        report = Report(["name", Column("active", fmt="yesno")])
+        report.add_rows([{"name": "a", "active": True}, {"name": "b", "active": False}])
+        self.assertEqual(report.to_csv(), "name,active\na,yes\nb,no\n")
+
+    def test_duplicate_name(self):
+        with self.assertRaises(ValueError):
+            register_format("int", str)
 
 
 if __name__ == "__main__":

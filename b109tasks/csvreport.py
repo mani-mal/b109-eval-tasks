@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import csv
 import io
-from collections.abc import Iterable, Mapping
+from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
 from decimal import Decimal
 from typing import Any
@@ -26,9 +26,43 @@ from typing import Any
 from .mdtable import format_table
 from .money import CurrencyMismatch, Money
 
-__all__ = ["Column", "Report"]
+__all__ = ["Column", "Report", "register_format"]
 
-FORMATS = ("int", "decimal2", "percent", "money")
+Formatter = Callable[[Any], str]
+
+
+def _int(value: Any) -> str:
+    return str(int(value))
+
+
+def _decimal2(value: Any) -> str:
+    return f"{Decimal(str(value)):.2f}"
+
+
+def _percent(value: Any) -> str:
+    text = f"{Decimal(str(value)) * 100:.1f}"
+    return text + "%"
+
+
+def _money(value: Any) -> str:
+    if not isinstance(value, Money):
+        raise TypeError(f"money column got {type(value).__name__}")
+    return value.to_plain()
+
+
+_FORMATTERS: dict[str, Formatter] = {
+    "int": _int,
+    "decimal2": _decimal2,
+    "percent": _percent,
+    "money": _money,
+}
+
+
+def register_format(name: str, func: Formatter) -> None:
+    """Make ``name`` usable as a column format."""
+    if name in _FORMATTERS:
+        raise ValueError(f"format {name!r} already registered")
+    _FORMATTERS[name] = func
 _RIGHT_ALIGNED = {"int", "decimal2", "percent", "money"}
 
 
@@ -39,7 +73,7 @@ class Column:
     fmt: str | None = None
 
     def __post_init__(self) -> None:
-        if self.fmt is not None and self.fmt not in FORMATS:
+        if self.fmt is not None and self.fmt not in _FORMATTERS:
             raise ValueError(f"unknown format {self.fmt!r}")
 
     @property
@@ -48,20 +82,9 @@ class Column:
 
 
 def format_value(value: Any, fmt: str | None) -> str:
-    if value is None:
-        return ""
-    if fmt == "int":
-        return str(int(value))
-    if fmt == "decimal2":
-        return f"{Decimal(str(value)):.2f}"
-    if fmt == "percent":
-        text = f"{Decimal(str(value)) * 100:.1f}"
-        return text + "%"
-    if fmt == "money":
-        if not isinstance(value, Money):
-            raise TypeError(f"money column got {type(value).__name__}")
-        return value.to_plain()
-    return str(value)
+    if fmt is None:
+        return "" if value is None else str(value)
+    return _FORMATTERS[fmt](value)
 
 
 class Report:
