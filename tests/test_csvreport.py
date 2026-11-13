@@ -107,5 +107,18 @@ class TotalsTest(unittest.TestCase):
             report.to_markdown()
 
 
+class MultiKeySortTest(unittest.TestCase):
+    def test_two_keys(self):
+        report = Report(["region", "orders"])
+        report.add_rows([
+            {"region": "south", "orders": 1},
+            {"region": "north", "orders": 7},
+            {"region": "south", "orders": 0},
+            {"region": "north", "orders": 2},
+        ])
+        report.sort_by("region", "orders")
+        self.assertEqual(report.to_csv(), "region,orders\nnorth,2\nnorth,7\nsouth,0\nsouth,1\n")
+
+
 if __name__ == "__main__":
     unittest.main()

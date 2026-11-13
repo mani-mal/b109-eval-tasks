@@ -81,12 +81,18 @@ class Report:
         for row in rows:
             self.add_row(row)
 
-    def sort_by(self, key: str, *, reverse: bool = False) -> None:
-        """Sort rows by ``key``; rows missing the key go last."""
-        present = [r for r in self.rows if r.get(key) is not None]
-        missing = [r for r in self.rows if r.get(key) is None]
-        present.sort(key=lambda r: r[key], reverse=reverse)
-        self.rows = present + missing
+    def sort_by(self, *keys: str, reverse: bool = False) -> None:
+        """Sort rows by ``keys``, the first being the primary key.
+
+        Rows missing a key go last for that key.
+        """
+        if not keys:
+            raise ValueError("sort_by needs at least one key")
+        for key in keys:
+            present = [r for r in self.rows if r.get(key) is not None]
+            missing = [r for r in self.rows if r.get(key) is None]
+            present.sort(key=lambda r: r[key], reverse=reverse)
+            self.rows = present + missing
 
     def formatted_rows(self) -> list[list[str]]:
         return [[format_value(row.get(c.key), c.fmt) for c in self.columns] for row in self.rows]
