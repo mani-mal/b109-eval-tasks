@@ -34,8 +34,11 @@ class RetryError(Exception):
 
 
 def backoff_delays(attempts: int, base_delay: float, factor: float,
-                   max_delay: float) -> list[float]:
-    """Delays slept between ``attempts`` tries: one fewer than ``attempts``."""
+                   max_delay: float | None = None) -> list[float]:
+    """Delays slept between ``attempts`` tries: one fewer than ``attempts``.
+
+    ``max_delay`` caps each delay; None means no cap.
+    """
     if attempts < 1:
         raise ValueError("attempts must be at least 1")
     if base_delay < 0 or factor < 1 or max_delay < 0:
@@ -54,7 +57,7 @@ def retry(
     attempts: int = 3,
     base_delay: float = 0.1,
     factor: float = 2.0,
-    max_delay: float = 30.0,
+    max_delay: float | None = None,
     retry_on: tuple[type[BaseException], ...] = (Exception,),
     sleep: Callable[[float], Any] = time.sleep,
     on_retry: Callable[[int, BaseException, float], Any] | None = None,

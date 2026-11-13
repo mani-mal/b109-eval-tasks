@@ -102,5 +102,10 @@ class LimiterTest(unittest.TestCase):
         self.assertEqual(bucket.available(), 0)
 
 
+class NoCapTest(unittest.TestCase):
+    def test_uncapped_by_default(self):
+        self.assertEqual(backoff_delays(4, 1, 10), [1, 10, 100])
+
+
 if __name__ == "__main__":
     unittest.main()
