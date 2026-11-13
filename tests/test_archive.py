@@ -50,5 +50,11 @@ class ListArchiveTest(unittest.TestCase):
             list_archive(z, max_entries=4)
 
 
+class PatternTest(unittest.TestCase):
+    def test_pattern(self):
+        z = make_zip([("a/x.py", b""), ("a/y.txt", b"")])
+        self.assertEqual([e.name for e in list_archive(z, pattern="*.py")], ["a/x.py"])
+
+
 if __name__ == "__main__":
     unittest.main()
